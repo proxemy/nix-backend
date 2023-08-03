@@ -1,9 +1,7 @@
 #TODO:
 # * Cmd "-e" parameter needs a persistent/secure location to store logs to
 
-{
-	pkgs ? import <nixpkgs> {},
-}:
+{ pkgs ? import <nixpkgs> {} }:
 pkgs.dockerTools.buildImage
 {
 	name = "docker-test";
