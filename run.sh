@@ -3,7 +3,12 @@
 set -xeuo pipefail
 
 pidof dockerd || exit 1
-mkdir -p /tmp/nginx_client_body
+#mkdir -p /tmp/nginx_client_body
+
+# stopping and removing all previous docker container/images
+docker stop   $(docker ps -aq) || true
+docker rm -vf $(docker ps -aq) || true
+docker rmi -f $(docker images -aq) || true
 
 nix_result=$(nix-build docker"$1".nix)
 
