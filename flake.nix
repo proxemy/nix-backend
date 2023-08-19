@@ -13,11 +13,7 @@ let
 	cfg = ./cfg.nix;
 in
 {
-	nginx-cfg =
-	{
-		root,
-		port ? 80
-	}:
+	nginx-cfg = { root, port ? "80" }:
 	pkgs.writeText "nginx.conf" ''
 		user nobody nobody;
 		daemon off;
@@ -38,9 +34,9 @@ in
 
 
 	packages.${system} =
-	{
+	rec {
 		# TODO: externalize the static www content into a dedicated file.
-		www-content = pkgs.writeTextDir "index.html" ''
+		www-content = pkgs.writeText "index.html" ''
 			<html><body>
 			<h1>Hello from web server.</h1>
 			<form>Example form.<br>
@@ -65,7 +61,6 @@ in
 		};
 
 		docker =
-		with self.packages.${system};
  		pkgs.dockerTools.buildImage
 		{
 			name = "docker-name"; # TODO
@@ -80,7 +75,7 @@ in
 				Cmd =
 				[
 					"${nginx}/bin/nginx"
-					"-c" self.nginx-cfg { root = www-content; }
+					"-c" (self.nginx-cfg { root = www-content; })
 					"-e" "/tmp"
 				];
 			};
