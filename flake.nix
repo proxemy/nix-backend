@@ -9,6 +9,7 @@
 	let
 		system = "x86_64-linux";
 		pkgs = nixpkgs.legacyPackages.${system};
+		globalDebug = true;
 	in
 	{
 		packages.${system} =
@@ -22,7 +23,20 @@
 				</form></body></html>
 			'';
 
-			webserver = pkgs.apacheHttpd;
+			webserver-apache = pkgs.apacheHttpd.override
+			{
+				proxySupport  = false;
+				#ldapSupport   = false; # TODO: commented out because of compilation errors.
+				luaSupport    = false;
+				brotliSupport = false; # TODO: brotli compression might be needed.
+			};
+
+			webserver-nginx = pkgs.nginx.override
+			{
+				withDebug = globalDebug;
+				withStream = false;
+				withPerl = false;
+			};
 		};
 
 		apps.${system}.default =
