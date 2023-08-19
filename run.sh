@@ -10,7 +10,13 @@ docker stop   $(docker ps -aq) || true
 docker rm -vf $(docker ps -aq) || true
 docker rmi -f $(docker images -aq) || true
 
-nix_result=$(nix-build docker"$1".nix)
+if [ -z ${1-""} ]; then
+	echo "building default flake"
+	nix build flake.nix#docker
+	nix_result=$(readlink result)
+else
+	nix_result=$(nix-build docker"$1".nix)
+fi
 
 docker_image=$(docker load < "$nix_result" | cut -d' ' -f3)
 
