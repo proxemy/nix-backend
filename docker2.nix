@@ -19,7 +19,13 @@ let
     }
   '';
   nginxWebRoot = pkgs.writeTextDir "index.html" ''
-    <html><body><h1>Hello from NGINX</h1></body></html>
+    <html><body>
+	<h1>Hello from NGINX</h1>
+	<form>Example form.<br>
+	<input type="text">
+
+	</form>
+	</body></html>
   '';
 in
 pkgs.dockerTools.buildLayeredImage {
