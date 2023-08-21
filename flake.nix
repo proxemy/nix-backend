@@ -43,7 +43,7 @@ in
 	packages.${system} =
 	rec {
 		# TODO: externalize the static www content into a dedicated file.
-		www-content = pkgs.writeText "index.html" ''
+		www-content = pkgs.writeTextDir "index.html" ''
 			<html><body>
 			<h1>Hello from web server.</h1>
 			<form>Example form.<br>
@@ -67,40 +67,29 @@ in
 			withPerl = false;
 		};
 
-		website = pkgs.stdenv.mkDerivation
+		docker = pkgs.dockerTools.buildImage
 		{
-			# TODO: This should be a minimal angular web app example.
+			name = name + "_docker";
 
-			name = "test";
-			src = www-content;
+			copyToRoot = pkgs.buildEnv
+			{
+				name = name;
 
-			#buildInputs = [ www-content ];
+				paths = [
+					nginx
+					pkgs.fakeNss
+					www-content
+					(if globalDebug then pkgs.strace else null)
+				];
 
-			installPhase = ''
-				mkdir -p $out/www
-				cp ${www-content} $out/www
-			'';
-		};
-
-		docker =
- 		pkgs.dockerTools.buildImage
-		{
-			name = "docker-name"; # TODO: global name variable.
-
-			copyToRoot =
-			[
-				pkgs.fakeNss
-				nginx
-			];
-
-			#extraCommands = "ls";
+				pathsToLink = [ nginx "/etc" ]; # /etc is required by nginx for getpwnam()
+			};
 
 			config = {
 				Cmd =
 				[
 					"${nginx}/bin/nginx"
 					"-c" (self.nginx-cfg { root = www-content; })
-					"-e" "/tmp"
 				];
 			};
 		};
