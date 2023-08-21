@@ -7,6 +7,7 @@ inputs = {
 
 outputs = { self, nixpkgs }:
 let
+	name = "webapp";
 	system = "x86_64-linux";
 	pkgs = nixpkgs.legacyPackages.${system};
 	globalDebug = true;
