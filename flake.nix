@@ -52,7 +52,7 @@ in
 		'';
 
 		# the apache server is not used. left it here for future consideration.
-		apache = pkgs.apacheHttpd.override
+		apache = pkgs.apacheHttpd.overrideAttrs
 		{
 			proxySupport  = false;
 			#ldapSupport   = false; # TODO: commented out because of compilation errors.
@@ -60,7 +60,7 @@ in
 			brotliSupport = false; # TODO: brotli compression might be needed.
 		};
 
-		nginx = pkgs.nginx.override
+		nginx = pkgs.nginx.overrideAttrs
 		{
 			withDebug = globalDebug;
 			withStream = false;
