@@ -66,6 +66,21 @@ in
 			withPerl = false;
 		};
 
+		website = pkgs.stdenv.mkDerivation
+		{
+			# TODO: This should be a minimal angular web app example.
+
+			name = "test";
+			src = www-content;
+
+			#buildInputs = [ www-content ];
+
+			installPhase = ''
+				mkdir -p $out/www
+				cp ${www-content} $out/www
+			'';
+		};
+
 		docker =
  		pkgs.dockerTools.buildImage
 		{
