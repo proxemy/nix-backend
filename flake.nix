@@ -18,7 +18,7 @@ in
 	pkgs.writeText "nginx.conf" ''
 		user nobody nobody;
 		daemon off;
-		error_log /dev/stdout info;
+		error_log /dev/stdout ${if globalDebug then "debug" else "info"};
 		pid /dev/null;
 		events {}
 		http {
@@ -79,10 +79,9 @@ in
 					nginx
 					pkgs.fakeNss
 					www-content
-					(if globalDebug then pkgs.strace else null)
 				];
 
-				pathsToLink = [ nginx "/etc" ]; # /etc is required by nginx for getpwnam()
+				pathsToLink = [ nginx "/etc" ]; # /etc{nsswitch.conf,passwd} is required by nginx/getpwnam()
 			};
 
 			config = {
