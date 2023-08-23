@@ -58,7 +58,7 @@ in
 			withPerl = false;
 		};
 
-		docker = pkgs.dockerTools.buildImage
+		docker-www = pkgs.dockerTools.buildImage
 		{
 			name = name + "_docker";
 
@@ -80,6 +80,32 @@ in
 				[
 					"${nginx}/bin/nginx"
 					"-c" (self.nginx-cfg { root = www-content; })
+				];
+			};
+		};
+
+		docker-db = pkgs.dockerTools.buildImage
+		{
+			name = name + "_docker";
+
+			copyToRoot = pkgs.buildEnv
+			{
+				name = name;
+
+				paths = [
+					pkgs.postgresql
+					pkgs.fakeNss
+				];
+
+				pathsToLink = [ pkgs.postgresql "/etc" ]; # /etc{nsswitch.conf,passwd} is required by nginx/getpwnam()
+			};
+
+			config = {
+				User = "nobody:nobody";
+				Cmd =
+				[
+					"${pkgs.postgresql}/bin/postgres"
+					"--config-file" "TODO"
 				];
 			};
 		};

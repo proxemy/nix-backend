@@ -11,10 +11,11 @@ docker rmi -f $(docker images -aq) || true
 
 if [ -z ${1-""} ]; then
 	echo "using default flake"
-	nix build flake.nix#docker
+	nix build .#docker-www
+	#nix build .#docker-db
 	nix_result=$(readlink result)
 else
-	nix_result=$(nix-build docker"$1".nix)
+	nix_result=$(nix build .#"$1")
 fi
 
 docker_image=$(docker load < "$nix_result" | cut -d' ' -f3)
