@@ -141,5 +141,7 @@ in
 		type = "app";
 		program = "${pkgs.hello}/bin/hello";
 	};
+
+	formatter.${system} = pkgs.nixpkgs-fmt;
 };
 }
