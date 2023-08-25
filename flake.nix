@@ -58,6 +58,11 @@ in
 		}
 	'';
 
+	postgres-cfg = {}:
+	pkgs.writeTextDir "postgresql.conf" ''
+		listen_addresses = 'localhost'
+	'';
+
 
 	packages.${system} =
 	rec {
@@ -75,6 +80,13 @@ in
 			withDebug = globalDebug;
 			withStream = false;
 			withPerl = false;
+		};
+
+		postgresql = pkgs.postgresql.overrideAttrs
+		{
+			enableSystemd = false;
+			gssSupport = false;
+			jitSupport = false;
 		};
 
 		docker-www = pkgs.dockerTools.buildImage
@@ -123,6 +135,8 @@ in
 
 				pathsToLink = [ pkgs.postgresql "/etc" ]; # /etc{nsswitch.conf,passwd} is required by nginx/getpwnam()
 			};
+
+			#extraCommands = "cp -p ./postgresql.conf $out/etc/";
 
 			config = {
 				User = "nobody:nobody";
