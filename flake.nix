@@ -11,7 +11,6 @@ let
 	system = "x86_64-linux";
 	pkgs = nixpkgs.legacyPackages.${system};
 	globalDebug = true;
-	cfg = ./cfg.nix;
 in
 {
 	nginx-cfg = { root, port ? "80" }:
