@@ -16,7 +16,6 @@ in
 {
 	nginx-cfg = { root, port ? "80" }:
 	pkgs.writeText "nginx.conf" ''
-		user nobody nobody;
 		daemon off;
 		error_log /dev/stdout ${if globalDebug then "debug" else "info"};
 		pid /dev/null;
@@ -72,10 +71,15 @@ in
 					www-content
 				];
 
-				pathsToLink = [ nginx "/etc" ]; # /etc{nsswitch.conf,passwd} is required by nginx/getpwnam()
+				pathsToLink = [
+					nginx
+					"/tmp" # TODO handle nginx store pathes via docker/etc
+					"/etc" # /etc{nsswitch.conf,passwd} is required by nginx/getpwnam()
+				];
 			};
 
 			config = {
+				User = "nobody:nobody";
 				Cmd =
 				[
 					"${nginx}/bin/nginx"
