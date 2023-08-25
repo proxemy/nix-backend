@@ -22,6 +22,7 @@ in
 		error_log /dev/stdout ${if globalDebug then "debug" else "warn"};
 		pid /dev/null;
 		events {}
+
 		http {
 			access_log /dev/stdout;
 			server {
@@ -30,6 +31,22 @@ in
 				index index.html;
 				location / {
 					root ${root};
+				}
+			}
+
+			# see 'https://postgrest.org/en/stable/explanations/nginx.html'
+			upstream postgrest {
+				server localhost:3000; # TODO parameterize postgres port
+			}
+
+			server {
+				location /api/ {
+					default_type  application/json;
+					proxy_hide_header Content-Location;
+					add_header Content-Location  /api/$upstream_http_content_location;
+					proxy_set_header  Connection "";
+					proxy_http_version 1.1;
+					proxy_pass http://postgrest/;
 				}
 			}
 
