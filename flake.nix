@@ -32,12 +32,13 @@ in
 					root ${root};
 				}
 			}
+
 			# TODO: find better places or disable right away.
-			client_body_temp_path /tmp;
-			proxy_temp_path /tmp;
-			fastcgi_temp_path /tmp;
-			uwsgi_temp_path /tmp;
-			scgi_temp_path /tmp;
+			client_body_temp_path /dev/null;
+			proxy_temp_path       /dev/null;
+			fastcgi_temp_path     /dev/null;
+			uwsgi_temp_path       /dev/null;
+			scgi_temp_path        /dev/null;
 		}
 	'';
 
