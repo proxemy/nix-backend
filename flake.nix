@@ -16,14 +16,17 @@ in
 {
 	nginx-cfg = { root, port ? "80" }:
 	pkgs.writeText "nginx.conf" ''
+		# see 'https://nginx.org/en/docs/' for config details.
+
 		daemon off;
-		error_log /dev/stdout ${if globalDebug then "debug" else "info"};
+		error_log /dev/stdout ${if globalDebug then "debug" else "warn"};
 		pid /dev/null;
 		events {}
 		http {
 			access_log /dev/stdout;
 			server {
 				listen ${port};
+				listen [::]:${port};
 				index index.html;
 				location / {
 					root ${root};
