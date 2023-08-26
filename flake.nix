@@ -117,7 +117,7 @@ in
 
 			copyToRoot = pkgs.buildEnv
 			{
-				name = name;
+				name = "image-root";
 
 				paths = [
 					nginx
@@ -148,10 +148,10 @@ in
 
 			copyToRoot = pkgs.buildEnv
 			{
-				name = name;
+				name = "image-root";
 
 				paths = [
-					pkgs.postgresql
+					postgresql
 					pkgs.fakeNss
 				];
 
@@ -164,8 +164,11 @@ in
 				[
 					"${pkgs.postgresql}/bin/postgres"
 					"-d" (if globalDebug then "5" else "1")
+					"-D" "/data"
 					"--config-file=${self.postgresql-cfg {} }"
 				];
+				WorkingDir = "/data";
+				Volumes = { "/data" = {}; };
 			};
 		};
 	};
