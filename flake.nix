@@ -151,11 +151,20 @@ in
 				name = "image-root";
 
 				paths = [
+					# TMP
+					pkgs.dockerTools.binSh
+					pkgs.coreutils-full
+					pkgs.findutils
+
 					postgresql
 					pkgs.fakeNss
 				];
 
-				pathsToLink = [ pkgs.postgresql "/etc" ]; # /etc{nsswitch.conf,passwd} is required by nginx/getpwnam()
+				pathsToLink = [
+					pkgs.postgresql
+					"/etc" # /etc{nsswitch.conf,passwd} is required by nginx/getpwnam()
+					"/bin" # TMP
+				];
 			};
 
 			config = {
@@ -164,8 +173,8 @@ in
 				[
 					"${pkgs.postgresql}/bin/postgres"
 					"-d" (if globalDebug then "5" else "1")
-					"-D" "/data"
 					"--config-file=${self.postgresql-cfg {} }"
+					"-D" "/data"
 				];
 				WorkingDir = "/data";
 				Volumes = { "/data" = {}; };
