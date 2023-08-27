@@ -85,7 +85,6 @@ in
 			#pgsodium.getkey_script = '@PGSODIUM_GETKEY_SCRIPT@'
 	'';
 
-
 	packages.${system} =
 	rec {
 		# TODO: externalize the static www content into a dedicated file.
@@ -142,30 +141,21 @@ in
 			};
 		};
 
-		docker-db = pkgs.dockerTools.buildImage
+
+		docker-db = pkgs.dockerTools.buildLayeredImage
 		{
-			name = name + "_docker";
+			name = name;
 
-			copyToRoot = pkgs.buildEnv
-			{
-				name = "image-root";
+			contents = [
+				postgresql
+				pkgs.dockerTools.fakeNss
+			];
 
-				paths = [
-					# TMP
-					pkgs.dockerTools.binSh
-					pkgs.coreutils-full
-					pkgs.findutils
-
-					postgresql
-					pkgs.fakeNss
-				];
-
-				pathsToLink = [
-					pkgs.postgresql
-					"/etc" # /etc{nsswitch.conf,passwd} is required by nginx/getpwnam()
-					"/bin" # TMP
-				];
-			};
+			fakeRootCommands = ''
+				mkdir -p ./data/${name}
+				chown nobody ./data/${name}
+				chmod u=+rwx,go=-rwx ./data/${name}
+			'';
 
 			config = {
 				User = "nobody:nobody";
@@ -174,9 +164,9 @@ in
 					"${pkgs.postgresql}/bin/postgres"
 					"-d" (if globalDebug then "5" else "1")
 					"--config-file=${self.postgresql-cfg {} }"
-					"-D" "/data"
+					"-D" "/data/${name}"
 				];
-				WorkingDir = "/data";
+				WorkingDir = "/data/${name}";
 				Volumes = { "/data" = {}; };
 			};
 		};
