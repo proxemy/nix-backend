@@ -95,6 +95,19 @@ in
 			</form></body></html>
 		'';
 
+		db-structure = pkgs.stdenv.mkDerivation
+		{
+			name = "postgres-initdb";
+
+			src = null;
+
+			buildInputs = [ postgres ];
+
+			buildPhase = ''
+				${postgres}/bin/initdb $out
+			'';
+		};
+
 		nginx = pkgs.nginx.overrideAttrs
 		{
 			withDebug = debug;
