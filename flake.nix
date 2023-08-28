@@ -87,7 +87,6 @@ in
 
 	packages.${system} =
 	rec {
-		# TODO: externalize the static www content into a dedicated file.
 		www-content = pkgs.writeTextDir "index.html" ''
 			<html><body>
 			<h1>Hello from web server.</h1>
@@ -103,7 +102,7 @@ in
 			withPerl = false;
 		};
 
-		postgresql = pkgs.postgresql.overrideAttrs
+		postgres = pkgs.postgresql.overrideAttrs
 		{
 			enableSystemd = false;
 			gssSupport = false;
@@ -147,7 +146,7 @@ in
 			name = name;
 
 			contents = [
-				postgresql
+				postgres
 				pkgs.dockerTools.fakeNss
 			];
 
@@ -161,7 +160,7 @@ in
 				User = "nobody:nobody";
 				Cmd =
 				[
-					"${pkgs.postgresql}/bin/postgres"
+					"${postgres}/bin/postgres"
 					"-d" (if debug then "5" else "1")
 					"--config-file=${self.postgresql-cfg {} }"
 					"-D" "/data/${name}"
