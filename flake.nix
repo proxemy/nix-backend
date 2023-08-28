@@ -10,7 +10,7 @@ let
 	name = "webapp";
 	system = "x86_64-linux";
 	pkgs = nixpkgs.legacyPackages.${system};
-	globalDebug = true;
+	debug = true;
 in
 {
 	nginx-cfg = { root, port ? "80" }:
@@ -18,7 +18,7 @@ in
 		# see 'https://nginx.org/en/docs/' for config details.
 
 		daemon off;
-		error_log /dev/stdout ${if globalDebug then "debug" else "warn"};
+		error_log /dev/stdout ${if debug then "debug" else "warn"};
 		pid /dev/null;
 		events {}
 
@@ -98,7 +98,7 @@ in
 
 		nginx = pkgs.nginx.overrideAttrs
 		{
-			withDebug = globalDebug;
+			withDebug = debug;
 			withStream = false;
 			withPerl = false;
 		};
@@ -162,7 +162,7 @@ in
 				Cmd =
 				[
 					"${pkgs.postgresql}/bin/postgres"
-					"-d" (if globalDebug then "5" else "1")
+					"-d" (if debug then "5" else "1")
 					"--config-file=${self.postgresql-cfg {} }"
 					"-D" "/data/${name}"
 				];
