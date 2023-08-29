@@ -160,14 +160,21 @@ in
 			contents = [
 				postgres
 				pkgs.dockerTools.fakeNss
+
+				#TMP
+				pkgs.dockerTools.binSh
+				pkgs.coreutils-full
+				pkgs.findutils
 			];
 
 			fakeRootCommands = ''
 				mkdir -p ./data/${name}
+				mkdir -p ./run/postgresql
 				cp -r ${db-structure}/* ./data/${name}/
 				cp -r ${self.postgres-conf {}} ./data/${name}/
-				chown -R nobody ./data/${name}
+				chown -R nobody ./data/${name} ./run/postgresql
 				chmod -R u=+rwx,go=-rwx ./data/${name}
+				chmod -R u=+rwx,go=-rwx ./run/postgresql
 			'';
 
 			config = {
