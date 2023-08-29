@@ -15,10 +15,10 @@ if [[ "$@" =~ ^-c$ ]]; then
 fi
 
 if [ -z ${1-""} ] || [[ "$@" =~ ^- ]]; then
-	#nix build .#docker-www
+	#nix build .#docker-www --debug
 	nix build .#docker-db --debug
 else
-	nix build .#"$1"
+	nix build .#"$1" --debug
 fi
 
 nix_result=$(readlink result)
