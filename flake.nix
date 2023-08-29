@@ -99,9 +99,9 @@ in
 		{
 			name = "postgres-initdb";
 
-			src = null;
-
 			buildInputs = [ postgres ];
+
+			dontUnpack = true; # disabling unpacking makes a 'src' variable obsolete.
 
 			buildPhase = ''
 				${postgres}/bin/initdb $out
@@ -153,7 +153,6 @@ in
 			};
 		};
 
-
 		docker-db = pkgs.dockerTools.buildLayeredImage
 		{
 			name = name;
@@ -165,8 +164,10 @@ in
 
 			fakeRootCommands = ''
 				mkdir -p ./data/${name}
-				chown nobody ./data/${name}
-				chmod u=+rwx,go=-rwx ./data/${name}
+				cp -r ${db-structure}/* ./data/${name}/
+				cp -r ${self.postgres-conf {}} ./data/${name}/
+				chown -R nobody ./data/${name}
+				chmod -R u=+rwx,go=-rwx ./data/${name}
 			'';
 
 			config = {
