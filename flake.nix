@@ -13,7 +13,7 @@ let
 	debug = true;
 in
 {
-	nginx-cfg = { root, port ? "80" }:
+	nginx-conf = { root, port ? "80" }:
 	pkgs.writeText "nginx.conf" ''
 		# see 'https://nginx.org/en/docs/' for config details.
 
@@ -58,7 +58,7 @@ in
 		}
 	'';
 
-	postgresql-cfg = { port ? "5432" }:
+	postgres-conf = { port ? "5432" }:
 	pkgs.writeText "postgreql.conf" ''
 			#datestyle = 'iso, mdy'
 			timezone = 'America/Chicago'
@@ -148,7 +148,7 @@ in
 				Cmd =
 				[
 					"${nginx}/bin/nginx"
-					"-c" (self.nginx-cfg { root = www-content; })
+					"-c" (self.nginx-conf { root = www-content; })
 				];
 			};
 		};
@@ -175,7 +175,6 @@ in
 				[
 					"${postgres}/bin/postgres"
 					"-d" (if debug then "5" else "1")
-					"--config-file=${self.postgresql-cfg {} }"
 					"-D" "/data/${name}"
 				];
 				WorkingDir = "/data/${name}";
