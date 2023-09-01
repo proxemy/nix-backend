@@ -11,80 +11,12 @@ let
 	system = "x86_64-linux";
 	pkgs = nixpkgs.legacyPackages.${system};
 	debug = true;
+
+	nginx-conf = import ./nix/nginx-conf.nix { inherit pkgs; };
+	postgres-conf = import ./nix/postgres-conf.nix { inherit pkgs; };
+	website = import ./nix/website { inherit pkgs; };
 in
 {
-	nginx-conf = { root, port ? "80" }:
-	pkgs.writeText "nginx.conf" ''
-		# see 'https://nginx.org/en/docs/' for config details.
-
-		daemon off;
-		error_log /dev/stdout ${if debug then "debug" else "warn"};
-		pid /dev/null;
-		events {}
-
-		http {
-			access_log /dev/stdout;
-			server {
-				listen ${port};
-				listen [::]:${port};
-				index index.html;
-				location / {
-					root ${root};
-				}
-			}
-
-			# see 'https://postgrest.org/en/stable/explanations/nginx.html'
-			upstream postgrest {
-				server localhost:3000; # TODO parameterize postgres port
-			}
-
-			server {
-				location /api/ {
-					default_type  application/json;
-					proxy_hide_header Content-Location;
-					add_header Content-Location  /api/$upstream_http_content_location;
-					proxy_set_header  Connection "";
-					proxy_http_version 1.1;
-					proxy_pass http://postgrest/;
-				}
-			}
-
-			# TODO: find better places or disable right away.
-			client_body_temp_path /dev/null;
-			proxy_temp_path       /dev/null;
-			fastcgi_temp_path     /dev/null;
-			uwsgi_temp_path       /dev/null;
-			scgi_temp_path        /dev/null;
-		}
-	'';
-
-	postgres-conf = { port ? "5432" }:
-	pkgs.writeText "postgreql.conf" ''
-		#datestyle = 'iso, mdy'
-		timezone = 'America/Chicago'
-		lc_messages = 'C'			# locale for system error message strings
-		lc_monetary = 'C'			# locale for monetary formatting
-		lc_numeric = 'C'			# locale for number formatting
-		lc_time = 'C'				# locale for time formatting
-
-		# default configuration for text search
-		listen_addresses = '*'		# what IP address(es) to listen on;
-		port = ${port}
-		max_connections = 100			# (change requires restart)
-		unix_socket_directories = '/tmp'	# comma-separated list of directories
-		shared_buffers = 128MB			# min 128kB
-		dynamic_shared_memory_type = posix	# the default is the first option
-		max_wal_size = 1GB
-		min_wal_size = 80MB
-
-		log_timezone = 'America/Chicago'
-		default_text_search_config = 'pg_catalog.english'
-
-		# TODO: figure out, wth this is
-		#shared_preload_libraries = 'auto_explain,pgsodium'
-		#pgsodium.getkey_script = '@PGSODIUM_GETKEY_SCRIPT@'
-	'';
-
 	packages.${system} =
 	rec {
 		www-content = pkgs.writeTextDir "index.html" ''
@@ -148,7 +80,7 @@ in
 				Cmd =
 				[
 					"${nginx}/bin/nginx"
-					"-c" (self.nginx-conf { root = www-content; })
+					"-c" (nginx-conf { root = www-content; })
 				];
 			};
 		};
@@ -160,18 +92,13 @@ in
 			contents = [
 				postgres
 				pkgs.dockerTools.fakeNss
-
-				#TMP
-				pkgs.dockerTools.binSh
-				pkgs.coreutils-full
-				pkgs.findutils
 			];
 
 			fakeRootCommands = ''
 				mkdir -p ./data/${name}
 				mkdir -p ./run/postgresql
 				cp -r ${db-structure}/* ./data/${name}/
-				cp -r ${self.postgres-conf {}} ./data/${name}/
+				cp -r ${postgres-conf {}} ./data/${name}/
 				chown -R nobody ./data/${name} ./run/postgresql
 				chmod -R u=+rwx,go=-rwx ./data/${name}
 				chmod -R u=+rwx,go=-rwx ./run/postgresql

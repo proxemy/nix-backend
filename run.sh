@@ -15,8 +15,8 @@ if [[ "$@" =~ ^-c$ ]]; then
 fi
 
 if [ -z ${1-""} ] || [[ "$@" =~ ^- ]]; then
-	#nix build .#docker-www --debug
-	nix build .#docker-db --debug
+	nix build .#docker-www --debug
+	#nix build .#docker-db --debug
 else
 	nix build .#"$1" --debug
 fi
@@ -31,5 +31,5 @@ else
 	# docker volume create data
 	#docker run -p 80:80 --mount type=volume,src=data,target=/data "$docker_image"
 	#docker run -v data:/data "$docker_image"
-	docker run -v data:/data "$docker_image"
+	docker run -p 80:80 -v data:/data "$docker_image"
 fi
