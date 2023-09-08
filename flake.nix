@@ -14,18 +14,11 @@ let
 
 	nginx-conf = import ./nix/nginx-conf.nix { inherit pkgs; };
 	postgres-conf = import ./nix/postgres-conf.nix { inherit pkgs; };
-	website = import ./nix/website { inherit pkgs; };
+	website = import ./nix/website.nix { inherit pkgs; };
 in
 {
 	packages.${system} =
 	rec {
-		www-content = pkgs.writeTextDir "index.html" ''
-			<html><body>
-			<h1>Hello from web server.</h1>
-			<form>Example form.<br>
-			<input type="text">
-			</form></body></html>
-		'';
 
 		db-structure = pkgs.stdenv.mkDerivation
 		{
@@ -37,6 +30,7 @@ in
 
 			buildPhase = ''
 				${postgres}/bin/initdb $out
+				#"-A" "scram-sha-512" # disables default 'trusted' authentification
 			'';
 		};
 
@@ -65,7 +59,7 @@ in
 				paths = [
 					nginx
 					pkgs.fakeNss
-					www-content
+					website
 				];
 
 				pathsToLink = [
@@ -80,7 +74,7 @@ in
 				Cmd =
 				[
 					"${nginx}/bin/nginx"
-					"-c" (nginx-conf { root = www-content; })
+					"-c" (nginx-conf { root = website; })
 				];
 			};
 		};
@@ -89,9 +83,16 @@ in
 		{
 			name = name;
 
+			maxLayers = 2; # for better build times
+
 			contents = [
 				postgres
 				pkgs.dockerTools.fakeNss
+
+				# TMP
+				pkgs.coreutils-full
+				pkgs.dockerTools.binSh
+				pkgs.findutils
 			];
 
 			fakeRootCommands = ''
