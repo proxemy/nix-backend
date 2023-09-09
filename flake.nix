@@ -64,7 +64,6 @@ in
 
 				pathsToLink = [
 					nginx
-					"/tmp" # TODO handle nginx store pathes via docker/etc
 					"/etc" # /etc{nsswitch.conf,passwd} is required by nginx/getpwnam()
 				];
 			};
@@ -75,6 +74,8 @@ in
 				[
 					"${nginx}/bin/nginx"
 					"-c" (nginx-conf { root = website; })
+					# TODO: maybe reintroduce the '-e' parameter again to fix:
+					# [alert] could not open error log file: open() "/var/log/nginx/error.log" failed
 				];
 			};
 		};
