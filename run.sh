@@ -4,7 +4,7 @@ set -xeuo pipefail
 
 
 nix_build_args="--debug"
-docker_run_args=""
+docker_run_args=()
 
 
 load_docker_result()
@@ -20,16 +20,16 @@ reset_docker()
 	docker volume rm $(docker volume ls -q) || true
 }
 
-launch_db()
+build_db()
 {
 	nix build .#docker-db "$nix_build_args"
-	docker run -v data:/data "$(load_docker_result)"
+	docker_run_args+=("-v data:/data $(load_docker_result)")
 }
 
-launch_www()
+build_www()
 {
 	nix build .#docker-www "$nix_build_args"
-	docker run -p 80:80 "$(load_docker_result)"
+	docker_run_args+=("-p 80:80 $(load_docker_result)")
 }
 
 
@@ -42,11 +42,18 @@ docker stop $(docker ps -aq) || true
 for arg in "$@"; do
 	case "$arg" in
 		"-c") reset_docker ;;
-		"-i") docker_run_args+="-it sh" ;;
-		"db") launch_db ;;
-		"www") launch_www ;;
+		"db") build_db ;;
+		"www") build_www ;;
 	esac
 done
+
+
+for run_arg in "${docker_run_args[@]}"; do
+	docker run $run_arg &
+done
+
+wait
+
 
 # docker volume create data
 #docker run -p 80:80 --mount type=volume,src=data,target=/data "$docker_image"
