@@ -50,7 +50,7 @@ in
 
 		docker-www = pkgs.dockerTools.buildImage
 		{
-			name = name + "_docker";
+			name = name + "_nginx";
 
 			copyToRoot = pkgs.buildEnv
 			{
@@ -82,7 +82,7 @@ in
 
 		docker-db = pkgs.dockerTools.buildLayeredImage
 		{
-			name = name;
+			name = name + "_postgres";
 
 			maxLayers = 2; # for better build times
 
