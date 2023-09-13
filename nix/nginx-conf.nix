@@ -1,4 +1,4 @@
-{ pkgs }: { root, port ? "80", debug ? false }:
+{ pkgs, name }: { root, port ? "80", debug ? false, postgres_port ? "5432" }:
 pkgs.writeText "nginx.conf" ''
 # see 'https://nginx.org/en/docs/' for config details.
 
@@ -20,7 +20,7 @@ http {
 
 	# see 'https://postgrest.org/en/stable/explanations/nginx.html'
 	upstream postgrest {
-		server localhost:3000; # TODO parameterize postgres port
+		server localhost:${postgres_port};
 	}
 
 	server {

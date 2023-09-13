@@ -49,7 +49,9 @@ done
 
 
 for run_arg in "${docker_run_args[@]}"; do
-	docker run $run_arg &
+	docker run --network=testnet $run_arg &
+	# TODO: parameterize testnet so one can have many internal networks of containers
+	# TODO: Better make flake targets for systemd unit files
 done
 
 wait

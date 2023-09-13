@@ -12,7 +12,7 @@ let
 	pkgs = nixpkgs.legacyPackages.${system};
 	debug = true;
 
-	nginx-conf = import ./nix/nginx-conf.nix { inherit pkgs; };
+	nginx-conf = import ./nix/nginx-conf.nix { inherit pkgs name; };
 	postgres-conf = import ./nix/postgres-conf.nix { inherit pkgs; };
 	website = import ./nix/website.nix { inherit pkgs; };
 in
@@ -60,11 +60,17 @@ in
 					nginx
 					pkgs.fakeNss
 					website
+
+					# TMP
+					pkgs.dockerTools.binSh
+					pkgs.coreutils-full
+					pkgs.findutils
 				];
 
 				pathsToLink = [
 					nginx
 					"/etc" # /etc{nsswitch.conf,passwd} is required by nginx/getpwnam()
+					"/bin"
 				];
 			};
 
