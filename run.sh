@@ -33,7 +33,6 @@ build_www()
 }
 
 
-
 pidof dockerd || exit 1
 
 # stopping and removing all previous docker container/images
@@ -47,15 +46,16 @@ for arg in "$@"; do
 	esac
 done
 
+pids=()
 
 for run_arg in "${docker_run_args[@]}"; do
-	docker run --network=testnet $run_arg &
+	docker run $run_arg &
+	pids+=($!)
 	# TODO: parameterize testnet so one can have many internal networks of containers
 	# TODO: Better make flake targets for systemd unit files
 done
 
-wait
-
+wait ${pids[@]}
 
 # docker volume create data
 #docker run -p 80:80 --mount type=volume,src=data,target=/data "$docker_image"
